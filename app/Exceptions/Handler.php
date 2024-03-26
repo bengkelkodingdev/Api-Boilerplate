@@ -2,7 +2,15 @@
 
 namespace App\Exceptions;
 
+use Exception;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\UnauthorizedException;
+use Symfony\Component\Finder\Exception\AccessDeniedException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -43,6 +51,42 @@ class Handler extends ExceptionHandler
     {
         $this->reportable(function (Throwable $e) {
             //
+        });
+
+        $this->renderable(function (NotFoundHttpException $e, Request $request) {
+            if ($request->is('api/*')) {
+                Log::error($e->getMessage());
+                return response()->json([
+                    'meta' => [
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                    ]
+                ], 404);
+            }
+        });
+
+        $this->renderable(function (UnauthorizedHttpException $e, Request $request) {
+            if ($request->is('api/*')) {
+                Log::error($e->getMessage());
+                return response()->json([
+                    'meta' => [
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                    ]
+                ], 401);
+            }
+        });
+
+        $this->renderable(function (Exception $e, Request $request) {
+            if ($request->is('api/*')) {
+                Log::error($e->getMessage());
+                return response()->json([
+                    'meta' => [
+                        'success' => false,
+                        'message' => $e->getMessage(),
+                    ]
+                ], 500);
+            }
         });
     }
 }
