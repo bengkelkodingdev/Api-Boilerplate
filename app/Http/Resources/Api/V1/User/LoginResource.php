@@ -30,6 +30,7 @@ class LoginResource extends JsonResource
                 'id' => $this->id,
                 'name' => $this->name,
                 'email' => $this->email,
+                'role' => $this->roles->first()->name,
             ],
             'token' => $this->token,
             'meta' => [
